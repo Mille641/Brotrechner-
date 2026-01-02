@@ -1,0 +1,83 @@
+:root{
+  --primary:#0ea5a4;
+  --bg:#f8fafc;
+  --card:#ffffff;
+  --text:#0f172a;
+  --muted:#64748b;
+  --radius:16px;
+}
+
+body.dark{
+  --bg:#020617;
+  --card:#020617;
+  --text:#e5e7eb;
+  --muted:#94a3b8;
+}
+
+*{
+  box-sizing:border-box;
+  font-family:system-ui,sans-serif;
+}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  padding:0;
+  max-width:100%;
+  width:100%;
+}
+
+#appContainer{
+  padding:16px;
+  padding-bottom:420px; /* Platz für Bottom-Bar */
+  max-width:720px;
+  margin:auto;
+}
+
+h1{
+  font-size:1.5rem;
+  margin-bottom:4px;
+}
+
+.subtitle{
+  color:var(--muted);
+}
+
+.card{
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:16px;
+  margin-bottom:16px;
+  box-shadow:0 4px 12px rgba(0,0,0,.08);
+}
+
+label{
+  font-size:.85rem;
+  color:var(--muted);
+}
+
+input, select, textarea{
+  width:100%;
+  padding:10px;
+  margin-top:4px;
+  margin-bottom:12px;
+  border-radius:10px;
+  border:1px solid #cbd5f5;
+}
+
+.row{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.row>div{
+  flex:1;
+  min-width:120px;
+}
+
+/* ✅ Einheitliche Ausrichtung für Checkbox + Text */
+.checklist-item{
+  display:grid;
+  grid-template-columns:28px 1fr;

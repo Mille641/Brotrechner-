@@ -1,0 +1,155 @@
+<!DOCTYPE html><html lang="de">
+<head>
+<link rel="apple-touch-icon" href="icon_2.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Brotrechner Meister Pro+</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0ea5a4" />
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="appContainer">
+<h1>Brotrechner Meister Pro+</h1>
+<p class="subtitle">Planung · Backzettel · Timer · Archiv</p><!-- Eingabefelder für Rezept --><div class="card">
+<h2>Rezeptdaten</h2>
+<label>Rezeptname</label><input id="name" placeholder="Mein Brot" />
+<label>Stückzahl</label><input type="number" id="stueckzahl" value="1" />
+<label>Gesamtmehl pro Stück (g)</label><input type="number" id="mehl" value="1000" />
+</div><div class="card">
+<h2>Mehl & Hydration</h2>
+<div class="toggle checklist-item"><input type="checkbox" id="unitToggle"> <label>Angaben in Gramm statt %</label></div>
+<div class="row"><div><label>Weizen (%)</label><input id="mw" value="60" /></div><div><label>Roggen (%)</label><input id="mr" value="20" /></div></div>
+<div class="row"><div><label>Dinkel (%)</label><input id="md" value="20" /></div><div><label>Vollkorn (%)</label><input id="mv" value="0" /></div></div>
+<label>Hydration (%)</label><input type="number" id="hydration" value="70" />
+<div class="row"><div><label>Salz (%)</label><input id="salz" value="2" /></div><div><label>Öl (%)</label><input id="oel" value="1" /></div></div>
+</div><div class="card">
+<h2>Sauerteig & Anstellgut</h2>
+<label>Sauerteig (% vom Mehl)</label><input id="asg" value="20" />
+<label>ASG Hydration (%)</label><input id="asgHyd" value="100" />
+<label>Anstellgut im Sauerteig (%)</label><input id="asgSeed" value="10" />
+</div><div class="card">
+<h2>Kochstück</h2>
+<div class="toggle checklist-item"><input type="checkbox" id="kochToggle" /><label>Kochstück verwenden</label></div>
+<div id="kochInputs" style="display:none">
+<label>Kochstück-Mehl (%)</label><input id="kochMehl" value="8" />
+<label>Wasserfaktor</label><input id="kochFaktor" value="4" />
+</div>
+</div><div class="card">
+<h2>Temperaturen</h2>
+<label>Wassertemperatur (°C)</label><input id="wasserTemp" value="20" />
+<label>Ziel-Teigtemperatur (°C)</label><input id="teigTemp" value="24" />
+</div><div class="card">
+<h2>Zeiten</h2>
+<label>Backzeitpunkt</label><input type="time" id="backzeit" value="08:00" />
+<label>Sauerteig reifen (h)</label><input id="stZeit" value="4" />
+<label>Stockgare (h)</label><input id="stock" value="3" />
+<label>Stückgare (h)</label><input id="stueck" value="2" />
+</div><div class="card">
+<h2>Backen</h2>
+<label>Backtemperatur (°C)</label><input id="temp" value="250" />
+<label>Backdauer (min)</label><input id="dauer" value="40" />
+</div><!-- Ergebnisanzeige --><div class="card result" id="result">
+<h2>📝 Rezeptübersicht</h2>
+<pre id="recipeOutput" style="white-space:pre-wrap;"></pre>
+</div><script>
+function berechneRezept(){
+ const gramMode = document.getElementById('unitToggle')?.checked;
+ const mehl = parseFloat(document.getElementById('mehl').value);
+ const stueck = parseInt(document.getElementById('stueckzahl').value);
+ const mw = parseFloat(document.getElementById('mw').value);
+ const mr = parseFloat(document.getElementById('mr').value);
+ const md = parseFloat(document.getElementById('md').value);
+ const mv = parseFloat(document.getElementById('mv').value);
+ const hydration = parseFloat(document.getElementById('hydration').value);
+ const salz = parseFloat(document.getElementById('salz').value);
+ const oel = parseFloat(document.getElementById('oel').value);
+ const asg = parseFloat(document.getElementById('asg').value);
+ const asgHyd = parseFloat(document.getElementById('asgHyd').value);
+ const asgSeed = parseFloat(document.getElementById('asgSeed').value);
+ const gesamtMehl = mehl * stueck;
+
+ const wPct = gramMode ? (mw/gesamtMehl*100) : mw;
+ const rPct = gramMode ? (mr/gesamtMehl*100) : mr;
+ const dPct = gramMode ? (md/gesamtMehl*100) : md;
+ const vPct = gramMode ? (mv/gesamtMehl*100) : mv;
+ const weizenMehl = gesamtMehl * mw/100;
+ const roggenMehl = gesamtMehl * mr/100;
+ const dinkelMehl = gesamtMehl * md/100;
+ const vollkornMehl = gesamtMehl * mv/100;
+ const wasser = gesamtMehl * hydration/100;
+ const salzMenge = gesamtMehl * salz/100;
+ const oelMenge = gesamtMehl * oel/100;
+ const asgMenge = gesamtMehl * asg/100 * asgSeed/100;
+ const asgWasser = asgMenge * asgHyd/100;
+
+ let output = `Rezept: ${document.getElementById('name').value}\n\n`;
+ output += `Stückzahl: ${stueck}\n`;
+ output += `Gesamtmehl: ${gesamtMehl.toFixed(0)} g\n`;
+ output += `Weizen: ${weizenMehl.toFixed(0)} g\nRoggen: ${roggenMehl.toFixed(0)} g\nDinkel: ${dinkelMehl.toFixed(0)} g\nVollkorn: ${vollkornMehl.toFixed(0)} g\n`;
+ output += `Wasser: ${wasser.toFixed(0)} g\nSalz: ${salzMenge.toFixed(0)} g\nÖl: ${oelMenge.toFixed(0)} g\n`;
+ output += `\nSauerteig: ${asgMenge.toFixed(0)} g (inkl. Wasser: ${asgWasser.toFixed(0)} g)\n`;
+ output += `\nTemperaturen:\nWasser: ${document.getElementById('wasserTemp').value} °C\nTeig: ${document.getElementById('teigTemp').value} °C\n`;
+ output += `\nBacken:\nTemperatur: ${document.getElementById('temp').value} °C\nDauer: ${document.getElementById('dauer').value} min\n`;
+ output += `\nZeitplan:\nSauerteig: ${document.getElementById('stZeit').value} h\nStockgare: ${document.getElementById('stock').value} h\nStückgare: ${document.getElementById('stueck').value} h\nBackzeitpunkt: ${document.getElementById('backzeit').value}\n`;
+
+ document.getElementById('recipeOutput').textContent = output;
+}
+
+[...document.querySelectorAll('input')].forEach(i=>i.addEventListener('input',berechneRezept));
+berechneRezept();
+</script><!-- Checkliste --><div class="card">
+<h3>✅ Back‑Checkliste</h3>
+<div id="progressWrap">
+<div style="font-size:.8rem;color:var(--muted)">Fortschritt: <span id="progressText">0 / 13</span></div>
+<div style="background:#e5e7eb;border-radius:8px;height:10px;overflow:hidden">
+<div id="progressBar" style="height:100%;width:0%;background:var(--primary)"></div>
+</div>
+</div>
+<div id="checklistContainer">
+<div class="checklist-item"><input type="checkbox" data-step="1"> 1. Anstellgut auffrischen</div>
+<div class="checklist-item"><input type="checkbox" data-step="2"> 2. Sauerteig ansetzen</div>
+<div class="checklist-item"><input type="checkbox" data-step="3"> 3. Sauerteig reifen lassen</div>
+<div class="checklist-item"><input type="checkbox" data-step="4"> 4. Hauptteig mischen</div>
+<div class="checklist-item"><input type="checkbox" data-step="5"> 5. Autolyse / Teigruhe</div>
+<div class="checklist-item"><input type="checkbox" data-step="6"> 6. Dehnen & Falten</div>
+<div class="checklist-item"><input type="checkbox" data-step="7"> 7. Stockgare abgeschlossen</div>
+<div class="checklist-item"><input type="checkbox" data-step="8"> 8. Formen</div>
+<div class="checklist-item"><input type="checkbox" data-step="9"> 9. Stückgare / Kältegare</div>
+<div class="checklist-item"><input type="checkbox" data-step="10"> 10. Ofen vorheizen</div>
+<div class="checklist-item"><input type="checkbox" data-step="11"> 11. Einschießen & Schwaden</div>
+<div class="checklist-item"><input type="checkbox" data-step="12"> 12. Ausbacken</div>
+<div class="checklist-item"><input type="checkbox" data-step="13"> 13. Auskühlen lassen</div>
+</div>
+<button onclick="resetChecklist()">🔄 Checkliste zurücksetzen</button>
+<button onclick="toggleBaecker()">🧑‍🍳 Bäckermodus</button>
+</div><!-- Notizen --><div class="card">
+<label>📝 Notizen zum Rezept</label>
+<textarea id="notes" style="width:100%;min-height:100px;padding:10px;border-radius:10px;border:1px solid #cbd5f5" placeholder="z.B. Krume etwas dichter – nächstes Mal 2 % mehr Wasser"></textarea>
+</div></div>
+<div style="height:140px;"></div>
+<div id="bottomBar" style="position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid #cbd5f5;display:flex;gap:8px;padding:8px;z-index:9999;flex-wrap:wrap;">
+<button onclick="startTimer()">⏱️ Timer</button>
+<button onclick="saveRecipe()">💾 Rezept speichern</button>
+<button onclick="exportJSON()">📦 Export</button>
+<button onclick="importJSON()">📥 Import</button>
+<button onclick="exportPDF()">📄 PDF</button>
+<button onclick="toggleDark()">🌙 Dark Mode</button>
+<button onclick="toggleBaecker()">🧑‍🍳 Bäckermodus</button>
+<button onclick="resetChecklist()">🔄 Reset</button>
+</div><footer>Offline · Android · Vollausbau · Profi-Modus</footer>
+<script>
+const el=id=>document.getElementById(id);
+const checks=[...document.querySelectorAll('#checklistContainer input')];
+const total=checks.length;
+let stepTimers={};
+function updateProgress(){ const done=checks.filter(c=>c.checked).length; el('progressText').textContent=`${done} / ${total}`; el('progressBar').style.width=(done/total*100)+'%'; localStorage.setItem('checklist',JSON.stringify(checks.map(c=>c.checked))); }
+checks.forEach((c,i)=>{ c.checked=JSON.parse(localStorage.getItem('checklist')||'[]')[i]||false; c.onchange=()=>{ updateProgress(); if(c.checked) startStepTimer(i+1); }; });
+function resetChecklist(){ checks.forEach(c=>c.checked=false); updateProgress(); }
+function startStepTimer(step){ const durations=[5,10,240,5,30,60,0,5,180,30,0,40,60]; const min=durations[step-1]; if(!min) return; if(Notification.permission!=='granted') Notification.requestPermission(); clearTimeout(stepTimers[step]); stepTimers[step]=setTimeout(()=>{ new Notification(`Schritt ${step} abgeschlossen`); },min*60000); }
+updateProgress();
+function toggleBaecker(){ document.body.classList.toggle('baker'); document.querySelectorAll('.checklist-item input').forEach(cb=>{ cb.style.transform=document.body.classList.contains('baker')?'scale(1.6)':'scale(1)'; cb.style.marginRight='8px'; }); }
+</script>
+</body>
+</html>
